@@ -34,7 +34,7 @@ buildscript {
     }
 }
 
-val isRelease = System.getenv("maven-release") == "true"
+val isRelease = System.getenv("MAVEN_RELEASE") == "true"
 if (isRelease) {
     project.version = project.version.toString().replace("-SNAPSHOT", "")
     println("Building release version ${project.version}")
@@ -62,13 +62,6 @@ tasks.withType(org.jetbrains.dokka.gradle.DokkaTask::class).configureEach {
 
     pluginConfiguration<org.jetbrains.dokka.base.DokkaBase, org.jetbrains.dokka.base.DokkaBaseConfiguration> {
         footerMessage = "Copyright © 2022 Erik Vesteraas"
-    }
-}
-
-signing {
-    setRequired({ isRelease && gradle.taskGraph.hasTask("publish") })
-    afterEvaluate {
-        sign(publishing.publications["maven"])
     }
 }
 
@@ -110,4 +103,9 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    setRequired({ isRelease })
+    sign(publishing.publications["maven"])
 }
