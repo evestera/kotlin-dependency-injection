@@ -4,6 +4,12 @@ Basic resolver of dependencies for constructor-based dependency injection of Kot
 
 - Self-contained. Classes being constructed do not need to know about this library.
 - Low maintenance. Adding or removing pre-existing classes as dependencies requires no changes to DI setup code.
+- Intentionally quite restricted to promote predictability and ease of understanding:
+  - Only Kotlin classes with a primary constructor can be automatically constructed from a class reference.
+    Other types are added as values or unambiguous function references (e.g. to a constructor or factory function).
+  - No optional parameters allowed (though they can be ignored with `@DoNotResolve`).
+  - Dependencies are resolvable *either* by type or by name, not both.
+  - No ambiguous resolution. If two values are valid an exception is thrown instead.
 
 ## Using
 
@@ -15,7 +21,7 @@ dependencies {
 }
 ```
 
-Then:
+### Basic usage
 
 ```kt
 // Given a set of classes depending on each other...
@@ -45,9 +51,41 @@ val app = resolveDependenciesAndGet<App>(
 )
 ```
 
-[//]: # (TODO: Docs - Annotations)
+### Injecting by name
 
-[//]: # (TODO: Docs - Factories)
+See [@ResolveByName](https://kotlin-dependency-injection.vstrs.dev/kotlin-dependency-injection/dev.vstrs.di/-resolve-by-name/)
+
+### Injecting all implementations of an interface
+
+See [@ResolveAll](https://kotlin-dependency-injection.vstrs.dev/kotlin-dependency-injection/dev.vstrs.di/-resolve-all/)
+
+### Function references and values
+
+You can use other things than just classes for dependency resolution.
+Direct values from calls like `Clock.systemUTC()`
+and function references like `::someFunction` can be used.
+
+The function references have to be unambiguous references to public functions.
+It is not currently possible to use inline lambdas as factory functions.
+
+Example:
+
+```kt
+fun dbConfig(appConfig: AppConfig) = appConfig.db
+
+fun createDbClient(dbConfig: DbConfig): DbClient {
+    // do something with dbConfig
+}
+
+val app = resolveDependenciesAndGet<App>(
+    Clock.systemUTC(),
+    AppConfig::class,
+    ::dbConfig,
+    ::connectionPool,
+    // ... more stuff using Clock and DbClient ...
+    App::class
+)
+```
 
 [//]: # (TODO: Docs - Dividing dependencies into layers and mocking a layer)
 

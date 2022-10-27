@@ -3,6 +3,13 @@ package dev.vstrs.di
 /**
  * Mark parameter as injected by name rather than type
  *
+ * Unless another name is provided, the paramater name is used for resolution.
+ *
+ * To provide a named value of type `T` to the dependency resolution, use a `Tuple<String, T>`.
+ * (Which you can make with the construct `"name" to value`).
+ *
+ * Example:
+ *
  * ```kt
  * class FrobnicatorClient(
  *     @ResolveByName private val frobnicatorUrl: String

@@ -18,8 +18,8 @@ private val logger = LoggerFactory.getLogger(DependencyResolutionContext::class.
  * Basic resolver of dependencies for constructor-based dependency injection.
  *
  * Intentionally quite restricted to promote predictability and ease of understanding:
- * - Only Kotlin classes with a primary constructor can be automatically constructed.
- *   Other types are added as values or wrapped in factory functions.
+ * - Only Kotlin classes with a primary constructor can be automatically constructed from a class reference.
+ *   Other types are added as values or unambiguous function references (e.g. to a constructor or factory function).
  * - No optional parameters allowed (though they can be ignored with @[DoNotResolve]).
  * - Dependencies are resolvable *either* by type or by name, not both.
  * - No ambiguous resolution. If two values are valid an exception is thrown instead.
@@ -71,6 +71,8 @@ class DependencyResolutionContext private constructor(
             valueType = source.returnType.jvmErasure,
             debugName = "::${source.name}"
         )
+
+        override fun toString(): String = debugName
     }
 
     /** Placeholder to indicate that a type is satisfied by several values, so it is ambiguous */
